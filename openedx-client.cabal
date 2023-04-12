@@ -4,11 +4,11 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           openedx
-version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/Xiswa/openedx#readme>
-homepage:       https://github.com/Xiswa/openedx#readme
-bug-reports:    https://github.com/Xiswa/openedx/issues
+name:           openedx-client
+version:        0.2.0.0
+description:    Please see the README on GitHub at <https://github.com/xiswa/openedx-client#readme>
+homepage:       https://github.com/xiswa/openedx-client#readme
+bug-reports:    https://github.com/xiswa/openedx-client/issues
 author:         PT Xiswa Adidaya Nusantara
 maintainer:     developer@xiswa.com
 copyright:      2023 PT Xiswa Adidaya Nusantara
@@ -21,7 +21,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/Xiswa/openedx
+  location: https://github.com/xiswa/openedx-client
 
 library
   exposed-modules:
@@ -30,7 +30,7 @@ library
       Openedx.Internal.Utils
       Openedx.Types
   other-modules:
-      Paths_openedx
+      Paths_openedx_client
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
@@ -52,7 +52,7 @@ test-suite openedx-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_openedx
+      Paths_openedx_client
   hs-source-dirs:
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
@@ -68,7 +68,7 @@ test-suite openedx-test
     , http-client-tls
     , http-types
     , mtl
-    , openedx
+    , openedx-client
     , servant
     , servant-client
     , servant-client-core
