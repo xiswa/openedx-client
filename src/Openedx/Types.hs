@@ -26,8 +26,9 @@ import Data.Text (Text)
 import Data.Map (Map)
 import Data.Aeson
 import Data.Aeson.TH
-import Openedx.Internal.Utils (removePrefix, camelToSnake)
 import qualified Web.FormUrlEncoded as W
+
+import Xiswa.Utils
 
 data OauthRequest = OauthRequest
   { oReqGrantType       :: !Text
@@ -38,7 +39,7 @@ data OauthRequest = OauthRequest
 
 formOptions :: W.FormOptions
 formOptions = W.FormOptions
-  { W.fieldLabelModifier = tail . camelToSnake . removePrefix "oReq"
+  { W.fieldLabelModifier = camelToSnakeWithPref "oReq"
   }
 
 instance W.ToForm OauthRequest where
@@ -56,7 +57,7 @@ data OauthResponse = OauthResponse
   deriving (Eq, Show)
 
 $(deriveJSON defaultOptions {
-    fieldLabelModifier  = tail . camelToSnake . removePrefix "oResp"
+    fieldLabelModifier  = camelToSnakeWithPref "oResp"
   } ''OauthResponse)
 
 
@@ -82,7 +83,7 @@ data UserCreateResponse = UserCreateResponse
   deriving (Eq, Show)
 
 $(deriveJSON defaultOptions {
-    fieldLabelModifier  = tail . camelToSnake . removePrefix "ucResp"
+    fieldLabelModifier  = camelToSnakeWithPref "ucResp"
   } ''UserCreateResponse)
 
 data User = User
@@ -95,7 +96,7 @@ data User = User
   deriving (Eq, Show)
 
 $(deriveJSON defaultOptions {
-    fieldLabelModifier  = tail . camelToSnake . removePrefix "user"
+    fieldLabelModifier  = camelToSnakeWithPref "user"
   } ''User)
 
 data Action = Enroll | Unenroll
@@ -112,7 +113,7 @@ data EnrollmentStatus = EnrollmentStatus
   deriving (Eq, Show)
 
 $(deriveJSON defaultOptions {
-    fieldLabelModifier  = tail . camelToSnake . removePrefix "es"
+    fieldLabelModifier  = camelToSnakeWithPref "es"
   } ''EnrollmentStatus)
 
 data ActionResult = ActionResult
@@ -123,7 +124,7 @@ data ActionResult = ActionResult
   deriving (Eq, Show)
 
 $(deriveJSON defaultOptions {
-    fieldLabelModifier  = tail . camelToSnake . removePrefix "ar"
+    fieldLabelModifier  = camelToSnakeWithPref "ar"
   } ''ActionResult)
 
 data BulkEnrollmentRequest = BulkEnrollmentRequest
@@ -137,7 +138,7 @@ data BulkEnrollmentRequest = BulkEnrollmentRequest
   deriving (Eq, Show)
 
 $(deriveJSON defaultOptions {
-    fieldLabelModifier  = tail . camelToSnake . removePrefix "beReq"
+    fieldLabelModifier  = camelToSnakeWithPref "beReq"
   , omitNothingFields   = True
   } ''BulkEnrollmentRequest)
 
@@ -148,7 +149,7 @@ data Course = Course
   deriving (Eq, Show)
 
 $(deriveJSON defaultOptions {
-    fieldLabelModifier  = tail . camelToSnake . removePrefix "course"
+    fieldLabelModifier  = camelToSnakeWithPref "course"
   } ''Course)
 
 data BulkEnrollmentResponse = BulkEnrollmentResponse
@@ -160,5 +161,5 @@ data BulkEnrollmentResponse = BulkEnrollmentResponse
   deriving (Eq, Show)
 
 $(deriveJSON defaultOptions {
-    fieldLabelModifier  = tail . camelToSnake . removePrefix "beResp"
+    fieldLabelModifier  = camelToSnakeWithPref "beResp"
   } ''BulkEnrollmentResponse)

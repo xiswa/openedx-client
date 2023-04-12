@@ -3,6 +3,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
 {-# LANGUAGE InstanceSigs               #-}
+{-# LANGUAGE FlexibleInstances          #-}
 module Main (main) where
 
 import Control.Exception
@@ -16,17 +17,20 @@ import Test.Hspec
 import Network.HTTP.Types
 import qualified Data.Map as M
 
+import Xiswa.Utils
+
 import Openedx
+
 
 newtype TestEnv = TestEnv 
   { unTestEnv :: (OpenedxConfig, ClientError -> ClientError)
   }
 
-instance HasOpenedxConfig TestEnv where
-  getConfig = fst . unTestEnv
+instance Has OpenedxConfig TestEnv where
+  obtain = fst . unTestEnv
 
-instance HasErrorConv ClientError TestEnv where
-  getErrorConv = snd . unTestEnv
+instance Has (ClientError -> ClientError) TestEnv where
+  obtain = snd . unTestEnv
 
 newtype Test a = Test
   { unTest :: ReaderT TestEnv IO a

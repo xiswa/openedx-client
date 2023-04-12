@@ -12,9 +12,7 @@
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Openedx.Client (
-    HasOpenedxConfig(..)
-  , HasErrorConv(..)
-  , OpenedxConfig(..)
+    OpenedxConfig(..)
   , WithOpenedx
 
   -- Client functions
@@ -36,14 +34,9 @@ import Servant.Client
 import Servant.Client.Generic
 import GHC.Generics
 
+import Xiswa.Utils
+
 import Openedx.Types
-import Openedx.Internal.Utils
-
-class HasOpenedxConfig env where
-  getConfig :: env -> OpenedxConfig
-
-class HasErrorConv err env where
-  getErrorConv :: env -> ClientError -> err
 
 data OpenedxConfig = OpenedxConfig
   { openedxClientId     :: !Text
@@ -56,13 +49,10 @@ $(deriveJSON defaultOptions {
     fieldLabelModifier = tail . camelToSnake . removePrefix "openedx"
   } ''OpenedxConfig)
 
-instance HasOpenedxConfig OpenedxConfig where
-  getConfig = id
-
 type WithOpenedx env err m =
   ( MonadReader env m
-  , HasOpenedxConfig env
-  , HasErrorConv err env
+  , Has OpenedxConfig env
+  , Has (ClientError -> err) env
   , MonadIO m
   , MonadError err m
   )
@@ -82,7 +72,7 @@ mkManager
   :: forall env err m. (WithOpenedx env err m)
   => m Manager
 mkManager = do
-  OpenedxConfig{..} <- asks getConfig
+  OpenedxConfig{..} <- grab
   liftIO $ case baseUrlScheme openedxUrl of
     Http  -> newManager defaultManagerSettings
     Https -> newManager tlsManagerSettings
@@ -91,8 +81,8 @@ oauthRoute
   :: forall env err m. (WithOpenedx env err m)
   => Oauth (AsClientT m)
 oauthRoute = genericClientHoist $ \c -> do
-  OpenedxConfig{..} <- asks getConfig
-  errorConv <- asks getErrorConv
+  OpenedxConfig{..} <- grab
+  errorConv <- grab
   manager <- mkManager
   let env = mkClientEnv manager openedxUrl
   resp <- liftIO (runClientM c env)
@@ -102,7 +92,7 @@ getAccessToken
   :: forall env err m. (WithOpenedx env err m)
   => m OauthResponse
 getAccessToken = do
-  OpenedxConfig{..} <- asks getConfig
+  OpenedxConfig{..} <- grab
   let oauthRequest = OauthRequest "client_credentials" openedxClientId openedxClientSecret
   _getAccessToken oauthRoute oauthRequest
 
@@ -143,8 +133,8 @@ openedxRoutes
   :: forall env err m. (WithOpenedx env err m)
   => Openedx (AsClientT m)
 openedxRoutes = genericClientHoist $ \c -> do
-  OpenedxConfig{..} <- asks getConfig
-  errorConv <- asks getErrorConv
+  OpenedxConfig{..} <- grab
+  errorConv <- grab
   manager <- mkManager
   let apiUrl = openedxUrl { baseUrlPath = "api" }
       env = mkClientEnv manager apiUrl

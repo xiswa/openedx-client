@@ -31,6 +31,7 @@ dependencies:
 - servant-client
 - servant-client-core
 - text
+- xiswa-utils
 
 ghc-options:
 - -Wall
