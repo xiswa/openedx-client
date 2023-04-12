@@ -12,8 +12,10 @@ type WithXendit env err m =
   , MonadError err m
   )
 ```
+See `src/Openedx/Client.hs` for more information.
 
-and ensure that Bulk Enrollment view is enabled in your OpenEdX instance.
+## Enable Bulk Enrollment view
+If you use [tutor](docs.tutor.overhang.io) then the easiest way is to use [plugins](https://docs.tutor.overhang.io/plugins/index.html).
 
 ## Setting up Oauth2 client
 You need to set up an Oauth2 client so that you can communicate with OpenEdX API as documented [here](https://github.com/hastexo/webhook-receiver/#edx-oauth2-client).
@@ -30,5 +32,3 @@ The configuration file should contain the following:
   "url": <your OpenEdX URL token>
 }
 ```
-
-To generate openedx client ID and secret, see [here]()
