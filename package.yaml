@@ -21,10 +21,15 @@ description:         Please see the README on GitHub at <https://github.com/Xisw
 
 dependencies:
 - base >= 4.7 && < 5
+- mtl
 - containers
 - aeson
+- http-api-data
+- http-client
+- http-client-tls
 - servant
 - servant-client
+- servant-client-core
 - text
 
 ghc-options:
@@ -56,5 +61,4 @@ tests:
     - hspec-wai
     - hspec-wai-json
     - aeson
-    - http-client
-    - http-client-tls
+    - http-types
