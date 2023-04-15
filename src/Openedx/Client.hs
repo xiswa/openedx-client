@@ -13,7 +13,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Openedx.Client (
     OpenedxConfig(..)
-  , WithOpenedx
 
   -- Client functions
   , getAccessToken
@@ -49,14 +48,6 @@ $(deriveJSON defaultOptions {
     fieldLabelModifier = tail . camelToSnake . removePrefix "openedx"
   } ''OpenedxConfig)
 
-type WithOpenedx env err m =
-  ( MonadReader env m
-  , Has OpenedxConfig env
-  , Has (ClientError -> err) env
-  , MonadIO m
-  , MonadError err m
-  )
-
 
 -- | OpenEdX Oauth endpoint
 newtype Oauth route = Oauth
@@ -69,7 +60,11 @@ newtype Oauth route = Oauth
   deriving (Generic)
 
 mkManager
-  :: forall env err m. (WithOpenedx env err m)
+  :: forall env m.
+     ( MonadReader env m
+     , Has OpenedxConfig env
+     , MonadIO m
+     )
   => m Manager
 mkManager = do
   OpenedxConfig{..} <- grab
@@ -78,7 +73,13 @@ mkManager = do
     Https -> newManager tlsManagerSettings
 
 oauthRoute
-  :: forall env err m. (WithOpenedx env err m)
+  :: forall env err m.
+     ( MonadReader env m
+     , Has OpenedxConfig env
+     , Has (ClientError -> err) env
+     , MonadIO m
+     , MonadError err m
+     )
   => Oauth (AsClientT m)
 oauthRoute = genericClientHoist $ \c -> do
   OpenedxConfig{..} <- grab
@@ -89,7 +90,13 @@ oauthRoute = genericClientHoist $ \c -> do
   liftEither $ first errorConv resp
 
 getAccessToken
-  :: forall env err m. (WithOpenedx env err m)
+  :: forall env err m.
+     ( MonadReader env m
+     , Has OpenedxConfig env
+     , Has (ClientError -> err) env
+     , MonadIO m
+     , MonadError err m
+     )
   => m OauthResponse
 getAccessToken = do
   OpenedxConfig{..} <- grab
@@ -130,7 +137,13 @@ data Openedx route = Openedx
   deriving (Generic)
 
 openedxRoutes
-  :: forall env err m. (WithOpenedx env err m)
+  :: forall env err m.
+     ( MonadReader env m
+     , Has OpenedxConfig env
+     , Has (ClientError -> err) env
+     , MonadIO m
+     , MonadError err m
+     )
   => Openedx (AsClientT m)
 openedxRoutes = genericClientHoist $ \c -> do
   OpenedxConfig{..} <- grab
@@ -146,7 +159,13 @@ oauthToken :: OauthResponse -> Text
 oauthToken resp = oRespTokenType resp <> " " <> oRespAccessToken resp
 
 bulkEnroll
-  :: forall env err m. (WithOpenedx env err m)
+  :: forall env err m.
+     ( MonadReader env m
+     , Has OpenedxConfig env
+     , Has (ClientError -> err) env
+     , MonadIO m
+     , MonadError err m
+     )
   => BulkEnrollmentRequest
   -> m BulkEnrollmentResponse
 bulkEnroll bulkEnrollmentRequest = do
@@ -154,7 +173,13 @@ bulkEnroll bulkEnrollmentRequest = do
   _bulkEnroll openedxRoutes (Just $ oauthToken oauthResp) bulkEnrollmentRequest
 
 createUser
-  :: forall env err m. (WithOpenedx env err m)
+  :: forall env err m.
+     ( MonadReader env m
+     , Has OpenedxConfig env
+     , Has (ClientError -> err) env
+     , MonadIO m
+     , MonadError err m
+     )
   => UserCreateRequest
   -> m UserCreateResponse
 createUser userCreateRequest = do
@@ -162,7 +187,13 @@ createUser userCreateRequest = do
   _createUser openedxRoutes (Just $ oauthToken oauthResp) userCreateRequest
   
 getUser
-  :: forall env err m. (WithOpenedx env err m)
+  :: forall env err m.
+     ( MonadReader env m
+     , Has OpenedxConfig env
+     , Has (ClientError -> err) env
+     , MonadIO m
+     , MonadError err m
+     )
   => Text
   -> m User
 getUser userName = do
