@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           openedx-client
-version:        0.2.0.0
+version:        0.2.1.0
 description:    Please see the README on GitHub at <https://github.com/xiswa/openedx-client#readme>
 homepage:       https://github.com/xiswa/openedx-client#readme
 bug-reports:    https://github.com/xiswa/openedx-client/issues
@@ -26,8 +26,10 @@ source-repository head
 library
   exposed-modules:
       Openedx
-      Openedx.Client
-      Openedx.Types
+      Openedx.Api.Common
+      Openedx.Api.Enrollment
+      Openedx.Api.User
+      Openedx.Config
   other-modules:
       Paths_openedx_client
   hs-source-dirs:
