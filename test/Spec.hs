@@ -23,14 +23,11 @@ import Openedx
 
 
 newtype TestEnv = TestEnv 
-  { unTestEnv :: (OpenedxConfig, ClientError -> ClientError)
+  { unTestEnv :: OpenedxConfig
   }
 
 instance Has OpenedxConfig TestEnv where
-  obtain = fst . unTestEnv
-
-instance Has (ClientError -> ClientError) TestEnv where
-  obtain = snd . unTestEnv
+  obtain = unTestEnv
 
 newtype Test a = Test
   { unTest :: ReaderT TestEnv IO a
@@ -55,7 +52,7 @@ spec :: TestEnv -> Spec
 spec env = do
   describe "getAccessToken" $ do
     it "responds with a valid access token" $ do
-      resp <- runTest env getAccessToken
+      resp <- runTest env $ getAccessToken id
       oRespTokenType resp `shouldBe` "Bearer"
 
   -- NOTE: needs to have "wahyu" already created and "tri" not created
@@ -64,10 +61,10 @@ spec env = do
         err404 (FailureResponse _ resp) = responseStatusCode resp == status404
         err404 _                        = False
     it "lookup user correctly" $ do
-      wahyu <- runTest env (getUser "wahyu")
+      wahyu <- runTest env (getUser id "wahyu")
       wahyu `shouldBe` User 5 "wahyu@gmail.com" "" "wahyu" True
 
-      runTest env (getUser "tri") `shouldThrow` err404
+      runTest env (getUser id "tri") `shouldThrow` err404
 
   -- NOTE: needs to have the course created first
   describe "bulkEnroll" $ do
@@ -88,11 +85,11 @@ spec env = do
            in arAfter result
           
     it "enrolls correctly" $ do
-      resp <- runTest env (bulkEnroll enrollRequest)
+      resp <- runTest env (bulkEnroll id enrollRequest)
       esEnrollment (enrollmentStatus "course-v1:AsalX+CS101+2023_T2" resp) `shouldBe` True
 
     it "unenrolls correctly" $ do
-      resp <- runTest env (bulkEnroll unenrollRequest)
+      resp <- runTest env (bulkEnroll id unenrollRequest)
       esEnrollment (enrollmentStatus "course-v1:AsalX+CS101+2023_T2" resp) `shouldBe` False
     
   describe "JSON instances" $ do
@@ -105,4 +102,4 @@ spec env = do
 main :: IO ()
 main = do
   config <- fromJust <$> decodeFileStrict' "config.json"
-  hspec $ spec $ TestEnv (config, id)
+  hspec $ spec $ TestEnv config

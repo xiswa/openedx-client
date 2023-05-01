@@ -70,14 +70,13 @@ oauthRoute
   :: forall env err m.
      ( MonadReader env m
      , Has OpenedxConfig env
-     , Has (ClientError -> err) env
      , MonadIO m
      , MonadError err m
      )
-  => Oauth (AsClientT m)
-oauthRoute = genericClientHoist $ \c -> do
+  => (ClientError -> err)
+  -> Oauth (AsClientT m)
+oauthRoute errorConv = genericClientHoist $ \c -> do
   OpenedxConfig{..} <- grab
-  errorConv <- grab
   manager <- mkManager
   let env = mkClientEnv manager openedxUrl
   resp <- liftIO (runClientM c env)
@@ -87,15 +86,15 @@ getAccessToken
   :: forall env err m.
      ( MonadReader env m
      , Has OpenedxConfig env
-     , Has (ClientError -> err) env
      , MonadIO m
      , MonadError err m
      )
-  => m OauthResponse
-getAccessToken = do
+  => (ClientError -> err)
+  -> m OauthResponse
+getAccessToken errorConv = do
   OpenedxConfig{..} <- grab
   let oauthRequest = OauthRequest "client_credentials" openedxClientId openedxClientSecret
-  _getAccessToken oauthRoute oauthRequest
+  _getAccessToken (oauthRoute errorConv) oauthRequest
 
 -- e.g. "Bearer <access_token>"
 oauthToken :: OauthResponse -> Text

@@ -49,14 +49,13 @@ enrollmentRoutes
   :: forall env err m.
      ( MonadReader env m
      , Has OpenedxConfig env
-     , Has (ClientError -> err) env
      , MonadIO m
      , MonadError err m
      )
-  => EnrollR (AsClientT m)
-enrollmentRoutes = genericClientHoist $ \c -> do
+  => (ClientError -> err)
+  -> EnrollR (AsClientT m)
+enrollmentRoutes errorConv = genericClientHoist $ \c -> do
   OpenedxConfig{..} <- grab
-  errorConv <- grab
   manager <- mkManager
   let apiUrl = openedxUrl { baseUrlPath = "api" }
       env = mkClientEnv manager apiUrl
@@ -67,15 +66,15 @@ bulkEnroll
   :: forall env err m.
      ( MonadReader env m
      , Has OpenedxConfig env
-     , Has (ClientError -> err) env
      , MonadIO m
      , MonadError err m
      )
-  => BulkEnrollmentRequest
+  => (ClientError -> err)
+  -> BulkEnrollmentRequest
   -> m BulkEnrollmentResponse
-bulkEnroll bulkEnrollmentRequest = do
-  oauthResp <- getAccessToken
-  _bulkEnroll enrollmentRoutes (Just $ oauthToken oauthResp) bulkEnrollmentRequest
+bulkEnroll errorConv bulkEnrollmentRequest = do
+  oauthResp <- getAccessToken errorConv
+  _bulkEnroll (enrollmentRoutes errorConv) (Just $ oauthToken oauthResp) bulkEnrollmentRequest
 
 
 data Action = Enroll | Unenroll

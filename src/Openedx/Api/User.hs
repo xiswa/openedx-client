@@ -55,14 +55,13 @@ userRoutes
   :: forall env err m.
      ( MonadReader env m
      , Has OpenedxConfig env
-     , Has (ClientError -> err) env
      , MonadIO m
      , MonadError err m
      )
-  => UserR (AsClientT m)
-userRoutes = genericClientHoist $ \c -> do
+  => (ClientError -> err)
+  -> UserR (AsClientT m)
+userRoutes errorConv = genericClientHoist $ \c -> do
   OpenedxConfig{..} <- grab
-  errorConv <- grab
   manager <- mkManager
   let apiUrl = openedxUrl { baseUrlPath = "api" }
       env = mkClientEnv manager apiUrl
@@ -73,29 +72,29 @@ createUser
   :: forall env err m.
      ( MonadReader env m
      , Has OpenedxConfig env
-     , Has (ClientError -> err) env
      , MonadIO m
      , MonadError err m
      )
-  => UserCreateRequest
+  => (ClientError -> err)
+  -> UserCreateRequest
   -> m UserCreateResponse
-createUser userCreateRequest = do
-  oauthResp <- getAccessToken
-  _createUser userRoutes (Just $ oauthToken oauthResp) userCreateRequest
+createUser errorConv userCreateRequest = do
+  oauthResp <- getAccessToken errorConv
+  _createUser (userRoutes errorConv) (Just $ oauthToken oauthResp) userCreateRequest
   
 getUser
   :: forall env err m.
      ( MonadReader env m
      , Has OpenedxConfig env
-     , Has (ClientError -> err) env
      , MonadIO m
      , MonadError err m
      )
-  => Text
+  => (ClientError -> err)
+  -> Text
   -> m User
-getUser userName = do
-  oauthResp <- getAccessToken
-  _getUser userRoutes (Just $ oauthToken oauthResp) userName
+getUser errorConv userName = do
+  oauthResp <- getAccessToken errorConv
+  _getUser (userRoutes errorConv) (Just $ oauthToken oauthResp) userName
 
 
 data UserCreateRequest = UserCreateRequest
